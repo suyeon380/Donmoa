@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Donmoa Gagyebu</title>
+  <!-- Chart.js (막대그래프) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SortableJS (카테고리 드래그 앤 드롭) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #f7f9f8;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --accent-green: #90e0ef;
+      --mint: #70e2b1;
+      --yellow-green: #c0ed5d;
+      --baby-blue: #BFEDF5;
+      --text-dark: #2c3e50;
+      --text-muted: #8a9a86;
+      --border-color: #e5ebe3;
+      --glass-shadow: 0 8px 32px 0 rgba(144, 224, 239, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", Roboto, sans-serif !important;
+    }
+
+    input, select, button, textarea, option {
+      font-family: inherit !important;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: radial-gradient(circle at 10% 20%, rgba(192, 237, 93, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(160, 196, 255, 0.2) 0%, transparent 40%);
+      color: var(--text-dark);
+      padding: 20px 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header & Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #70e2b1, #a0c4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .month-picker-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      padding: 6px 12px;
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-circle {
+      background: white;
+      border: 1px solid var(--border-color);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-circle:hover {
+      background: var(--yellow-green);
+    }
+
+    /* Dashboard Summary Cards */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      width: 100%;
+    }
+
+    .card h3 {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .card .amount {
+      font-size: 1.1rem;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .amount.income { color: #70E2B1; }
+    .amount.expense { 
+      color: #A1C9FF; 
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .amount.balance { color: #888888; }
+
+    /* Insights Box */
+    .insight-card {
+      background: linear-gradient(135deg, rgba(192, 237, 93, 0.3), rgba(112, 226, 177, 0.2));
+      border: 1px solid var(--mint);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .grid-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    input, select, button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: white;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    input[type="date"] {
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: 40px;
+      background-color: #fff;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--mint);
+      box-shadow: 0 0 0 3px rgba(112, 226, 177, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #B3F2D4, #b3e8f2);
+      border: none;
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-gray {
+      background: #f0f0f0;
+      border: 1px solid var(--border-color);
+      font-weight: 500;
+      color: #888888;
+      cursor: pointer;
+    }
+
+    .btn-gray:hover {
+      background: #e4e4e4;
+      color: #555555;
+    }
+
+    /* Calendar Styling */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .calendar-day-head {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 4px 0;
+    }
+
+    .calendar-cell {
+      background: white;
+      min-height: 46px;
+      border-radius: 8px;
+      padding: 2px 4px;
+      font-size: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border-color);
+    }
+
+    .cell-date { font-weight: 600; }
+    .cell-income { color: #91e3bf; font-size: 0.55rem; }
+    .cell-expense { color: #A1C9FF; font-size: 0.55rem; font-weight: 600; }
+
+    /* Category Tag & Fixed Items Management */
+    .category-list, .fixed-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .cat-tag, .fixed-tag {
+      background: white;
+      padding: 6px 10px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cat-tag { cursor: grab; }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0 2px;
+      font-weight: bold;
+      width: auto;
+    }
+
+    .btn-del:hover {
+      color: #74E2AC;
+    }
+
+    /* Database Table Styling */
+    details.db-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--glass-shadow);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    details summary {
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-dark);
+      outline: none;
+    }
+
+    .db-table-container {
+      margin-top: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .db-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .db-table th, .db-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .db-table th {
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .tag-income { color: #91e3bf; font-weight: 600; }
+    .tag-expense { color: #A1C9FF; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px 10px;
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .dashboard {
+        gap: 6px;
+      }
+
+      .card {
+        padding: 10px 8px;
+      }
+
+      .card h3 {
+        font-size: 0.68rem;
+      }
+
+      .card .amount {
+        font-size: 0.85rem;
+      }
+
+      .input-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .calendar-cell {
+        min-height: 40px;
+        padding: 2px 1px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 헤더 -->
+  <header>
+    <h1>Donmoa Gagyebu</h1>
+    <div class="month-picker-container">
+      <button class="btn-circle" id="prevMonth">&lt;</button>
+      <span id="currentMonthDisplay" style="font-weight: 600; font-size: 0.9rem;"></span>
+      <button class="btn-circle" id="nextMonth">&gt;</button>
+    </div>
+  </header>
+
+  <!-- 요약 카드 -->
+  <section class="dashboard">
+    <div class="card">
+      <h3>월 총 수익</h3>
+      <div class="amount income" id="totalIncome">0 원</div>
+    </div>
+    <div class="card">
+      <h3>월 총 지출</h3>
+      <div class="amount expense" id="totalExpense">0 원</div>
+    </div>
+    <div class="card">
+      <h3>이 달 남은 돈</h3>
+      <div class="amount balance" id="remainingBalance">0 원</div>
+    </div>
+  </section>
+
+  <!-- 메인 그리드 -->
+  <div class="main-grid">
+    <div class="grid-col">
+      <!-- 내역 입력 -->
+      <div class="card">
+        <h2 style="font-size: 1rem; margin-bottom: 12px;">내역 입력</h2>
+        <form id="transactionForm" class="form-group">
+          <div class="input-row">
+            <select id="typeSelect">
+              <option value="expense">지출</option>
+              <option value="income">수익</option>
+            </select>
+            <input type="date" id="dateInput" required>
+          </div>
+          <div class="input-row">
+            <input type="number" id="amountInput" placeholder="금액 (원)" required>
+            <select id="categorySelect"></select>
+          </div>
+          <input type="text" id="memoInput" placeholder="내역 메모 (선택)">
+          <button type="submit" class="btn-primary">입력하기</button>
+        </form>
+      </div>
+
+      <!-- 고정지출 설정 -->
+      <div class="card">
+        <h2 style="font-size: 1rem; margin-bottom: 12px;">고정지출 자동등록 설정</h2>
+        <form id="fixedExpenseForm" class="form-group" style="margin-bottom: 12px;">
+          <input type="text" id="fixedName" placeholder="항목명 (예: 월세)" required>
+          <div class="input-row">
+            <input type="number" id="fixedDay" placeholder="날짜(일)" min="1" max="31" required>
+            <input type="number" id="fixedAmount" placeholder="금액 (원)" required>
+          </div>
+          <button type="submit" class="btn-gray">등록</button>
+        </form>
+        <button id="applyFixedBtn" class="btn-primary" style="margin-bottom: 12px;">
+          이 달의 고정지출 일괄 적용하기
+        </button>
+        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">등록된 고정지출 목록</h4>
+        <div id="fixedExpenseList" class="fixed-list"></div>
+      </div>
+
+      <!-- 카테고리 관리 -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 1rem;">카테고리 관리</h2>
+          <button id="addCatBtn" class="btn-circle" title="카테고리 추가">+</button>
+        </div>
+        <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">드래그해서 순서를 변경하거나 ✕ 버튼으로 삭제할 수 있습니다.</p>
+        
+        <h4 style="font-size: 0.8rem; margin-top: 10px;">지출 카테고리</h4>
+        <div id="expenseCatList" class="category-list"></div>
+
+        <h4 style="font-size: 0.8rem; margin-top: 10px;">수익 카테고리</h4>
+        <div id="incomeCatList" class="category-list"></div>
+      </div>
+    </div>
+
+    <div class="grid-col">
+      <!-- 동향 분석 -->
+      <div class="insight-card" id="insightBox">
+        📊 이번 달 지출 데이터를 분석 중입니다...
+      </div>
+
+      <!-- 그래프 -->
+      <div class="card">
+        <h2 style="font-size: 1rem; margin-bottom: 12px;">카테고리별 지출 통계</h2>
+        <div style="position: relative; height:200px; width:100%;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 달력 -->
+      <div class="card">
+        <h2 style="font-size: 1rem; margin-bottom: 8px;">날짜별 현황 (달력)</h2>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 접이식 내역 DB -->
+  <details class="db-card">
+    <summary>🗄️ 전체 입력 내역 데이터베이스</summary>
+    <div class="db-table-container">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>구분</th>
+            <th>카테고리</th>
+            <th>메모</th>
+            <th>금액</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="dbTableBody"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <script>
+    const defaultData = {
+      categories: {
+        income: ['월급', '용돈', '캐쉬백', '기타'],
+        expense: ['월세', '보험', '통신', '교통', '식비', '데이트', '쇼핑', '세금', '의료', '문화생활']
+      },
+      fixedExpenses: [
+        { id: 1, name: '월세', amount: 500000, day: 25 },
+        { id: 2, name: '보험료', amount: 100000, day: 10 }
+      ],
+      transactions: []
+    };
+
+    // Safe Load LocalStorage (기본 카테고리 유실 방지)
+    let appData = defaultData;
+    try {
+      const stored = localStorage.getItem('myLedgerData');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        appData = {
+          categories: {
+            income: parsed.categories?.income || defaultData.categories.income,
+            expense: parsed.categories?.expense || defaultData.categories.expense
+          },
+          fixedExpenses: parsed.fixedExpenses || defaultData.fixedExpenses,
+          transactions: parsed.transactions || defaultData.transactions
+        };
+      }
+    } catch (e) {
+      appData = defaultData;
+    }
+
+    let currentDate = new Date();
+
+    function saveData() {
+      localStorage.setItem('myLedgerData', JSON.stringify(appData));
+      render();
+    }
+
+    const formatKRW = (num) => new Intl.NumberFormat('ko-KR').format(num) + '원';
+
+    // 모바일 지원 날짜 구하기 (YYYY-MM-DD)
+    function getFormattedDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    document.getElementById('dateInput').value = getFormattedDate(currentDate);
+
+    function render() {
+      renderHeader();
+      renderCategories();
+      renderFixedExpenses();
+      renderTransactionsAndSummary();
+      renderCalendar();
+      renderChart();
+      renderInsights();
+      renderDatabaseTable();
+    }
+
+    function renderHeader() {
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      document.getElementById('currentMonthDisplay').innerText = `${year}.${month}`;
+    }
+
+    function renderCategories() {
+      const type = document.getElementById('typeSelect').value;
+      const select = document.getElementById('categorySelect');
+      select.innerHTML = '';
+      
+      const cats = appData.categories && appData.categories[type] ? appData.categories[type] : [];
+      cats.forEach(cat => {
+        select.innerHTML += `<option value="${cat}">${cat}</option>`;
+      });
+
+      const expenseList = document.getElementById('expenseCatList');
+      const incomeList = document.getElementById('incomeCatList');
+      
+      if (expenseList) {
+        expenseList.innerHTML = (appData.categories.expense || []).map(c => `
+          <div class="cat-tag" data-id="${c}">
+            <span>⋮⋮ ${c}</span>
+            <button class="btn-del" onclick="deleteCategory('expense', '${c}')">✕</button>
+          </div>
+        `).join('');
+      }
+
+      if (incomeList) {
+        incomeList.innerHTML = (appData.categories.income || []).map(c => `
+          <div class="cat-tag" data-id="${c}">
+            <span>⋮⋮ ${c}</span>
+            <button class="btn-del" onclick="deleteCategory('income', '${c}')">✕</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function deleteCategory(type, catName) {
+      if (confirm(`'${catName}' 카테고리를 삭제하시겠습니까?`)) {
+        appData.categories[type] = appData.categories[type].filter(c => c !== catName);
+        saveData();
+      }
+    }
+
+    function renderFixedExpenses() {
+      const fixedList = document.getElementById('fixedExpenseList');
+      if (!appData.fixedExpenses || appData.fixedExpenses.length === 0) {
+        fixedList.innerHTML = '<span style="font-size:0.75rem; color:var(--text-muted);">등록된 고정지출이 없습니다.</span>';
+        return;
+      }
+
+      fixedList.innerHTML = appData.fixedExpenses.map(f => `
+        <div class="fixed-tag">
+          <span>매월 ${f.day || 1}일 - ${f.name} (${formatKRW(f.amount)})</span>
+          <button class="btn-del" onclick="deleteFixedExpense(${f.id})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('fixedExpenseForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('fixedName').value;
+      const day = Number(document.getElementById('fixedDay').value);
+      const amount = Number(document.getElementById('fixedAmount').value);
+
+      if (!appData.fixedExpenses) appData.fixedExpenses = [];
+      appData.fixedExpenses.push({ id: Date.now(), name, day, amount });
+      
+      document.getElementById('fixedName').value = '';
+      document.getElementById('fixedDay').value = '';
+      document.getElementById('fixedAmount').value = '';
+      saveData();
+    });
+
+    function deleteFixedExpense(id) {
+      appData.fixedExpenses = appData.fixedExpenses.filter(f => f.id !== id);
+      saveData();
+    }
+
+    new Sortable(document.getElementById('expenseCatList'), {
+      animation: 150,
+      onEnd: () => {
+        const updated = Array.from(document.querySelectorAll('#expenseCatList .cat-tag')).map(el => el.dataset.id);
+        appData.categories.expense = updated;
+        saveData();
+      }
+    });
+
+    new Sortable(document.getElementById('incomeCatList'), {
+      animation: 150,
+      onEnd: () => {
+        const updated = Array.from(document.querySelectorAll('#incomeCatList .cat-tag')).map(el => el.dataset.id);
+        appData.categories.income = updated;
+        saveData();
+      }
+    });
+
+    // 모바일 호환 날짜 필터링 함수 (Date 객체 파싱 이슈 해결)
+    function getCurrentMonthTransactions() {
+      const curYear = currentDate.getFullYear();
+      const curMonth = currentDate.getMonth() + 1;
+
+      return (appData.transactions || []).filter(t => {
+        if (!t.date) return false;
+        const parts = t.date.split('-');
+        const tYear = parseInt(parts[0], 10);
+        const tMonth = parseInt(parts[1], 10);
+        return tYear === curYear && tMonth === curMonth;
+      });
+    }
+
+    function renderTransactionsAndSummary() {
+      const currentTx = getCurrentMonthTransactions();
+      const totalInc = currentTx.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
+      const totalExp = currentTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
+      
+      document.getElementById('totalIncome').innerText = formatKRW(totalInc);
+      document.getElementById('totalExpense').innerText = formatKRW(totalExp);
+      document.getElementById('remainingBalance').innerText = formatKRW(totalInc - totalExp);
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      days.forEach(d => grid.innerHTML += `<div class="calendar-day-head">${d}</div>`);
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div></div>`;
+      }
+
+      const txs = getCurrentMonthTransactions();
+
+      for (let date = 1; date <= lastDate; date++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+        const dayTxs = txs.filter(t => t.date === dateStr);
+        
+        const incSum = dayTxs.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount), 0);
+        const expSum = dayTxs.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount), 0);
+
+        grid.innerHTML += `
+          <div class="calendar-cell">
+            <span class="cell-date">${date}</span>
+            <div>
+              ${incSum ? `<div class="cell-income">+${(incSum/1000).toFixed(0)}k</div>` : ''}
+              ${expSum ? `<div class="cell-expense">-${(expSum/1000).toFixed(0)}k</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    let myChart = null;
+    function renderChart() {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      const txs = getCurrentMonthTransactions().filter(t => t.type === 'expense');
+
+      const catTotals = {};
+      txs.forEach(t => {
+        catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
+      });
+
+      const labels = Object.keys(catTotals);
+      const data = Object.values(catTotals);
+
+      if (myChart) myChart.destroy();
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, 'rgba(112, 226, 177, 0.85)');
+      gradient.addColorStop(1, 'rgba(112, 226, 177, 0.2)');
+
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['내역 없음'],
+          datasets: [{
+            label: '지출 금액 (원)',
+            data: data.length ? data : [0],
+            backgroundColor: gradient,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function renderInsights() {
+      const txs = getCurrentMonthTransactions().filter(t => t.type === 'expense');
+      const variableTxs = txs.filter(t => !['월세', '보험'].includes(t.category));
+      
+      if (variableTxs.length === 0) {
+        document.getElementById('insightBox').innerHTML = '💡 이번 달 지출 내역을 입력하시면 분석을 시작합니다.';
+        return;
+      }
+
+      const catTotals = {};
+      variableTxs.forEach(t => {
+        catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
+      });
+      
+      const topCat = Object.keys(catTotals).reduce((a, b) => catTotals[a] > catTotals[b] ? a : b);
+
+      const curYear = currentDate.getFullYear();
+      const curMonth = currentDate.getMonth() + 1;
+      const prevYear = curMonth === 1 ? curYear - 1 : curYear;
+      const prevMonth = curMonth === 1 ? 12 : curMonth - 1;
+
+      const prevTxs = (appData.transactions || []).filter(t => {
+        if (!t.date) return false;
+        const parts = t.date.split('-');
+        return parseInt(parts[0], 10) === prevYear && 
+               parseInt(parts[1], 10) === prevMonth && 
+               t.type === 'expense' && 
+               !['월세', '보험'].includes(t.category);
+      });
+
+      const curVarTotal = variableTxs.reduce((sum, t) => sum + Number(t.amount), 0);
+      const prevVarTotal = prevTxs.reduce((sum, t) => sum + Number(t.amount), 0);
+      const diff = curVarTotal - prevVarTotal;
+
+      let trendMsg = '';
+      if (prevTxs.length === 0) {
+        trendMsg = '전월 비교 데이터가 없습니다.';
+      } else if (diff > 0) {
+        trendMsg = `전월 대비 변동 지출이 <strong>${formatKRW(diff)} 증가</strong>했습니다.`;
+      } else {
+        trendMsg = `전월 대비 변동 지출을 <strong>${formatKRW(Math.abs(diff))} 절약</strong>했습니다! 🎉`;
+      }
+
+      document.getElementById('insightBox').innerHTML = `
+        💡 <strong>이 달의 지출 동향 분석 (고정지출 제외)</strong><br>
+        이번 달 가장 많은 지출을 차지한 항목은 <strong>[${topCat}]</strong> (${formatKRW(catTotals[topCat])}) 입니다.<br>
+        ${trendMsg}
+      `;
+    }
+
+    function renderDatabaseTable() {
+      const tbody = document.getElementById('dbTableBody');
+      tbody.innerHTML = '';
+
+      if (!appData.transactions || appData.transactions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">입력된 내역 데이터가 없습니다.</td></tr>`;
+        return;
+      }
+
+      const sortedTxs = [...appData.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      sortedTxs.forEach(t => {
+        const isInc = t.type === 'income';
+        tbody.innerHTML += `
+          <tr>
+            <td>${t.date}</td>
+            <td class="${isInc ? 'tag-income' : 'tag-expense'}">${isInc ? '수익' : '지출'}</td>
+            <td>${t.category}</td>
+            <td>${t.memo || '-'}</td>
+            <td>${formatKRW(t.amount)}</td>
+            <td><button class="btn-del" onclick="deleteTransaction(${t.id})">삭제</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function deleteTransaction(id) {
+      if (confirm('해당 내역을 삭제하시겠습니까?')) {
+        appData.transactions = appData.transactions.filter(t => t.id !== id);
+        saveData();
+      }
+    }
+
+    document.getElementById('typeSelect').addEventListener('change', renderCategories);
+
+    document.getElementById('transactionForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newTx = {
+        id: Date.now(),
+        type: document.getElementById('typeSelect').value,
+        date: document.getElementById('dateInput').value,
+        amount: Number(document.getElementById('amountInput').value),
+        category: document.getElementById('categorySelect').value,
+        memo: document.getElementById('memoInput').value
+      };
+      if (!appData.transactions) appData.transactions = [];
+      appData.transactions.push(newTx);
+      saveData();
+      document.getElementById('amountInput').value = '';
+      document.getElementById('memoInput').value = '';
+    });
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      render();
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      render();
+    });
+
+    document.getElementById('addCatBtn').addEventListener('click', () => {
+      const type = prompt("추가할 카테고리 타입을 입력하세요 (지출 또는 수익):");
+      if (!['지출', '수익'].includes(type)) return alert("지출 또는 수익만 입력 가능합니다.");
+      
+      const catName = prompt("새 카테고리 이름을 입력하세요:");
+      if (!catName) return;
+
+      const targetKey = type === '지출' ? 'expense' : 'income';
+      if (!appData.categories[targetKey]) appData.categories[targetKey] = [];
+      
+      if (!appData.categories[targetKey].includes(catName)) {
+        appData.categories[targetKey].push(catName);
+        saveData();
+      }
+    });
+
+    document.getElementById('applyFixedBtn').addEventListener('click', () => {
+      if (!appData.fixedExpenses || appData.fixedExpenses.length === 0) {
+        return alert("등록된 고정지출이 없습니다. 먼저 고정지출을 등록해 주세요.");
+      }
+
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const lastDayOfMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
+      
+      appData.fixedExpenses.forEach(f => {
+        const targetDay = Math.min(f.day || 1, lastDayOfMonth);
+        const dayStr = String(targetDay).padStart(2, '0');
+
+        appData.transactions.push({
+          id: Date.now() + Math.random(),
+          type: 'expense',
+          date: `${year}-${month}-${dayStr}`,
+          amount: f.amount,
+          category: f.name,
+          memo: `[고정지출] ${f.name}`
+        });
+      });
+      saveData();
+      alert("이 달의 고정지출이 지정한 날짜에 맞추어 일괄 적용되었습니다.");
+    });
+
+    render();
+  </script>
+</body>
+</html>
