@@ -39,7 +39,7 @@
                         radial-gradient(circle at 90% 80%, rgba(160, 196, 255, 0.2) 0%, transparent 40%);
       color: var(--text-dark);
       padding: 20px 16px;
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
     }
 
@@ -48,7 +48,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     h1 {
@@ -94,7 +94,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .card {
@@ -105,6 +105,7 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.6);
       width: 100%;
+      margin-bottom: 16px;
     }
 
     .card h3 {
@@ -134,21 +135,7 @@
       padding: 16px;
       font-size: 0.85rem;
       line-height: 1.5;
-    }
-
-    /* Main Grid Layout */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .grid-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: 0;
+      margin-bottom: 16px;
     }
 
     /* Forms & Inputs */
@@ -282,14 +269,15 @@
       color: #74E2AC;
     }
 
-    /* Database Table Styling */
-    details.db-card {
+    /* Accordion Details Styling */
+    details.foldable-card {
       background: var(--card-bg);
       border-radius: 16px;
       padding: 16px;
       box-shadow: var(--glass-shadow);
       border: 1px solid rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
+      margin-bottom: 12px;
     }
 
     details summary {
@@ -298,10 +286,33 @@
       cursor: pointer;
       color: var(--text-dark);
       outline: none;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details summary::after {
+      content: '▼';
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    details[open] summary::after {
+      transform: rotate(180deg);
+    }
+
+    .foldable-content {
+      margin-top: 14px;
+    }
+
+    /* Database Table Styling */
     .db-table-container {
-      margin-top: 12px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -333,17 +344,14 @@
         padding: 12px 10px;
       }
 
-      .main-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
       .dashboard {
         gap: 6px;
+        margin-bottom: 12px;
       }
 
       .card {
-        padding: 10px 8px;
+        padding: 12px;
+        margin-bottom: 12px;
       }
 
       .card h3 {
@@ -378,119 +386,121 @@
     </div>
   </header>
 
-  <!-- 요약 카드 -->
+  <!-- 1. 월 총~ (요약 카드) -->
   <section class="dashboard">
-    <div class="card">
+    <div class="card" style="margin-bottom: 0;">
       <h3>월 총 수익</h3>
       <div class="amount income" id="totalIncome">0 원</div>
     </div>
-    <div class="card">
+    <div class="card" style="margin-bottom: 0;">
       <h3>월 총 지출</h3>
       <div class="amount expense" id="totalExpense">0 원</div>
     </div>
-    <div class="card">
+    <div class="card" style="margin-bottom: 0;">
       <h3>이 달 남은 돈</h3>
       <div class="amount balance" id="remainingBalance">0 원</div>
     </div>
   </section>
 
-  <!-- 메인 그리드 -->
-  <div class="main-grid">
-    <div class="grid-col">
-      <!-- 내역 입력 -->
-      <div class="card">
-        <h2 style="font-size: 1rem; margin-bottom: 12px;">내역 입력</h2>
-        <form id="transactionForm" class="form-group">
-          <div class="input-row">
-            <select id="typeSelect">
-              <option value="expense">지출</option>
-              <option value="income">수익</option>
-            </select>
-            <input type="date" id="dateInput" required>
-          </div>
-          <div class="input-row">
-            <input type="number" id="amountInput" placeholder="금액 (원)" required>
-            <select id="categorySelect" required></select>
-          </div>
-          <input type="text" id="memoInput" placeholder="내역 메모 (선택)">
-          <button type="submit" class="btn-primary">입력하기</button>
-        </form>
+  <!-- 2. 내역 입력 -->
+  <div class="card">
+    <h2 style="font-size: 1rem; margin-bottom: 12px;">내역 입력</h2>
+    <form id="transactionForm" class="form-group">
+      <div class="input-row">
+        <select id="typeSelect">
+          <option value="expense">지출</option>
+          <option value="income">수익</option>
+        </select>
+        <input type="date" id="dateInput" required>
       </div>
-
-      <!-- 고정지출 설정 -->
-      <div class="card">
-        <h2 style="font-size: 1rem; margin-bottom: 12px;">고정지출 자동등록 설정</h2>
-        <form id="fixedExpenseForm" class="form-group" style="margin-bottom: 12px;">
-          <input type="text" id="fixedName" placeholder="항목명 (예: 월세/공과금)" required>
-          <div class="input-row">
-            <select id="fixedCategorySelect" required></select>
-            <input type="number" id="fixedDay" placeholder="날짜(일)" min="1" max="31" required>
-          </div>
-          <input type="number" id="fixedAmount" placeholder="금액 (원)" required>
-          <button type="submit" class="btn-gray">고정지출 등록</button>
-        </form>
-        <button id="applyFixedBtn" class="btn-primary" style="margin-bottom: 12px;">
-          이 달의 고정지출 일괄 적용하기
-        </button>
-        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">등록된 고정지출 목록</h4>
-        <div id="fixedExpenseList" class="fixed-list"></div>
+      <div class="input-row">
+        <input type="number" id="amountInput" placeholder="금액 (원)" required>
+        <select id="categorySelect" required></select>
       </div>
-
-      <!-- 카테고리 관리 -->
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h2 style="font-size: 1rem;">카테고리 관리</h2>
-          <button id="addCatBtn" class="btn-circle" title="카테고리 추가">+</button>
-        </div>
-        <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">드래그해서 순서를 변경하거나 ✕ 버튼으로 삭제할 수 있습니다.</p>
-        
-        <h4 style="font-size: 0.8rem; margin-top: 10px;">지출 카테고리</h4>
-        <div id="expenseCatList" class="category-list"></div>
-
-        <h4 style="font-size: 0.8rem; margin-top: 10px;">수익 카테고리</h4>
-        <div id="incomeCatList" class="category-list"></div>
-      </div>
-    </div>
-
-    <div class="grid-col">
-      <!-- 동향 분석 -->
-      <div class="insight-card" id="insightBox">
-        📊 이번 달 지출 데이터를 분석 중입니다...
-      </div>
-
-      <!-- 그래프 -->
-      <div class="card">
-        <h2 style="font-size: 1rem; margin-bottom: 12px;">카테고리별 지출 통계</h2>
-        <div style="position: relative; height:200px; width:100%;">
-          <canvas id="categoryChart"></canvas>
-        </div>
-      </div>
-
-      <!-- 달력 -->
-      <div class="card">
-        <h2 style="font-size: 1rem; margin-bottom: 8px;">날짜별 현황 (달력)</h2>
-        <div class="calendar-grid" id="calendarGrid"></div>
-      </div>
-    </div>
+      <input type="text" id="memoInput" placeholder="내역 메모 (선택)">
+      <button type="submit" class="btn-primary">입력하기</button>
+    </form>
   </div>
 
-  <!-- 접이식 내역 DB -->
-  <details class="db-card">
+  <!-- 3. 동향 분석 -->
+  <div class="insight-card" id="insightBox">
+    📊 이번 달 지출 데이터를 분석 중입니다...
+  </div>
+
+  <!-- 4. 날짜별 지출 (달력) -->
+  <div class="card">
+    <h2 style="font-size: 1rem; margin-bottom: 8px;">날짜별 현황 (달력)</h2>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+
+  <!-- 5. 카테고리별 지출 (접어두기) -->
+  <details class="foldable-card" id="chartDetails">
+    <summary>📊 카테고리별 지출 통계</summary>
+    <div class="foldable-content">
+      <div style="position: relative; height:200px; width:100%;">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+  </details>
+
+  <!-- 6. 고정지출 관리 (접어두기) -->
+  <details class="foldable-card">
+    <summary>🔄 고정지출 자동등록 설정</summary>
+    <div class="foldable-content">
+      <form id="fixedExpenseForm" class="form-group" style="margin-bottom: 12px;">
+        <input type="text" id="fixedName" placeholder="항목명 (예: 월세/공과금)" required>
+        <div class="input-row">
+          <select id="fixedCategorySelect" required></select>
+          <input type="number" id="fixedDay" placeholder="날짜(일)" min="1" max="31" required>
+        </div>
+        <input type="number" id="fixedAmount" placeholder="금액 (원)" required>
+        <button type="submit" class="btn-gray">고정지출 등록</button>
+      </form>
+      <button id="applyFixedBtn" class="btn-primary" style="margin-bottom: 12px;">
+        이 달의 고정지출 일괄 적용하기
+      </button>
+      <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">등록된 고정지출 목록</h4>
+      <div id="fixedExpenseList" class="fixed-list"></div>
+    </div>
+  </details>
+
+  <!-- 7. 카테고리 관리 (접어두기) -->
+  <details class="foldable-card">
+    <summary>🏷️ 카테고리 관리</summary>
+    <div class="foldable-content">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.85rem; font-weight: 600;">새 카테고리 추가</span>
+        <button id="addCatBtn" class="btn-circle" title="카테고리 추가">+</button>
+      </div>
+      <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">드래그해서 순서를 변경하거나 ✕ 버튼으로 삭제할 수 있습니다.</p>
+      
+      <h4 style="font-size: 0.8rem; margin-top: 10px;">지출 카테고리</h4>
+      <div id="expenseCatList" class="category-list"></div>
+
+      <h4 style="font-size: 0.8rem; margin-top: 10px;">수익 카테고리</h4>
+      <div id="incomeCatList" class="category-list"></div>
+    </div>
+  </details>
+
+  <!-- 8. 데이터베이스 (접어두기) -->
+  <details class="foldable-card">
     <summary>🗄️ 전체 입력 내역 데이터베이스</summary>
-    <div class="db-table-container">
-      <table class="db-table">
-        <thead>
-          <tr>
-            <th>날짜</th>
-            <th>구분</th>
-            <th>카테고리</th>
-            <th>메모</th>
-            <th>금액</th>
-            <th>관리</th>
-          </tr>
-        </thead>
-        <tbody id="dbTableBody"></tbody>
-      </table>
+    <div class="foldable-content">
+      <div class="db-table-container">
+        <table class="db-table">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>구분</th>
+              <th>카테고리</th>
+              <th>메모</th>
+              <th>금액</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="dbTableBody"></tbody>
+        </table>
+      </div>
     </div>
   </details>
 
@@ -575,7 +585,6 @@
         });
       }
 
-      // 고정지출용 카테고리 셀렉트박스도 지출 카테고리의 첫 번째 항목이 기본 선택되도록 통일
       const fixedCatSelect = document.getElementById('fixedCategorySelect');
       fixedCatSelect.innerHTML = '';
       const expCats = appData.categories && appData.categories.expense ? appData.categories.expense : [];
@@ -773,6 +782,13 @@
         }
       });
     }
+
+    // 접힌 그래프 메뉴를 열었을 때 비율 깨짐 방지
+    document.getElementById('chartDetails').addEventListener('toggle', (e) => {
+      if (e.target.open) {
+        setTimeout(renderChart, 50);
+      }
+    });
 
     function renderInsights() {
       const txs = getCurrentMonthTransactions().filter(t => t.type === 'expense');
