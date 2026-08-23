@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Donmoa Gagyebu</title>
+  <title>Donmoa</title>
   <!-- Chart.js (막대그래프) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- SortableJS (카테고리 드래그 앤 드롭) -->
@@ -86,7 +86,7 @@
     }
 
     .btn-circle:hover {
-      background: var(--yellow-green);
+      background: #e4e4e4;
     }
 
     /* Dashboard Summary Cards */
@@ -149,6 +149,16 @@
       display: flex;
       gap: 8px;
       width: 100%;
+    }
+
+    .input-row-half {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .input-row-half select {
+      flex: 1;
     }
 
     input, select, button {
@@ -367,6 +377,11 @@
         gap: 8px;
       }
 
+      .input-row-half {
+        flex-direction: row;
+        gap: 8px;
+      }
+
       .calendar-cell {
         min-height: 40px;
         padding: 2px 1px;
@@ -378,7 +393,7 @@
 
   <!-- 헤더 -->
   <header>
-    <h1>Donmoa Gagyebu</h1>
+    <h1>Donmoa</h1>
     <div class="month-picker-container">
       <button class="btn-circle" id="prevMonth">&lt;</button>
       <span id="currentMonthDisplay" style="font-weight: 600; font-size: 0.9rem;"></span>
@@ -406,18 +421,24 @@
   <div class="card">
     <h2 style="font-size: 1rem; margin-bottom: 12px;">내역 입력</h2>
     <form id="transactionForm" class="form-group">
-      <div class="input-row">
+      <!-- 1) 날짜 -->
+      <input type="date" id="dateInput" required>
+      
+      <!-- 2) 지출/수익 & 3) 카테고리 -->
+      <div class="input-row-half">
         <select id="typeSelect">
           <option value="expense">지출</option>
           <option value="income">수익</option>
         </select>
-        <input type="date" id="dateInput" required>
-      </div>
-      <div class="input-row">
-        <input type="number" id="amountInput" placeholder="금액 (원)" required>
         <select id="categorySelect" required></select>
       </div>
+
+      <!-- 4) 금액 -->
+      <input type="number" id="amountInput" placeholder="금액 (원)" required>
+      
+      <!-- 5) 메모 -->
       <input type="text" id="memoInput" placeholder="내역 메모 (선택)">
+      
       <button type="submit" class="btn-primary">입력하기</button>
     </form>
   </div>
@@ -427,11 +448,13 @@
     📊 이번 달 지출 데이터를 분석 중입니다...
   </div>
 
-  <!-- 4. 날짜별 지출 (달력) -->
-  <div class="card">
-    <h2 style="font-size: 1rem; margin-bottom: 8px;">날짜별 현황 (달력)</h2>
-    <div class="calendar-grid" id="calendarGrid"></div>
-  </div>
+  <!-- 4. 날짜별 지출 (달력 - 접어두기) -->
+  <details class="foldable-card">
+    <summary>📅 날짜별 현황 (달력)</summary>
+    <div class="foldable-content">
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </details>
 
   <!-- 5. 카테고리별 지출 (접어두기) -->
   <details class="foldable-card" id="chartDetails">
@@ -443,17 +466,23 @@
     </div>
   </details>
 
-  <!-- 6. 고정지출 관리 (접어두기) -->
+<!-- 6. 고정지출 관리 (접어두기) -->
   <details class="foldable-card">
     <summary>🔄 고정지출 자동등록 설정</summary>
     <div class="foldable-content">
       <form id="fixedExpenseForm" class="form-group" style="margin-bottom: 12px;">
+        <!-- 1) 카테고리 -->
+        <select id="fixedCategorySelect" required></select>
+        
+        <!-- 2) 항목명 -->
         <input type="text" id="fixedName" placeholder="항목명 (예: 월세/공과금)" required>
-        <div class="input-row">
-          <select id="fixedCategorySelect" required></select>
-          <input type="number" id="fixedDay" placeholder="날짜(일)" min="1" max="31" required>
-        </div>
+        
+        <!-- 3) 날짜(일) -->
+        <input type="number" id="fixedDay" placeholder="날짜(일)" min="1" max="31" required>
+        
+        <!-- 4) 금액 -->
         <input type="number" id="fixedAmount" placeholder="금액 (원)" required>
+        
         <button type="submit" class="btn-gray">고정지출 등록</button>
       </form>
       <button id="applyFixedBtn" class="btn-primary" style="margin-bottom: 12px;">
@@ -783,7 +812,6 @@
       });
     }
 
-    // 접힌 그래프 메뉴를 열었을 때 비율 깨짐 방지
     document.getElementById('chartDetails').addEventListener('toggle', (e) => {
       if (e.target.open) {
         setTimeout(renderChart, 50);
