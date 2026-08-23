@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Donmoa</title>
+  <title>Donmoa Gagyebu</title>
   <!-- Chart.js (막대그래프) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- SortableJS (카테고리 드래그 앤 드롭) -->
@@ -393,7 +393,7 @@
 
   <!-- 헤더 -->
   <header>
-    <h1>Donmoa</h1>
+    <h1>Donmoa Gagyebu</h1>
     <div class="month-picker-container">
       <button class="btn-circle" id="prevMonth">&lt;</button>
       <span id="currentMonthDisplay" style="font-weight: 600; font-size: 0.9rem;"></span>
@@ -448,17 +448,17 @@
     📊 이번 달 지출 데이터를 분석 중입니다...
   </div>
 
-  <!-- 4. 날짜별 지출 (달력 - 접어두기) -->
+  <!-- 4. 일별 지출 현황 (달력 - 접어두기) -->
   <details class="foldable-card">
-    <summary>📅 날짜별 지출 내역</summary>
+    <summary>📅 일별 지출 현황 (달력)</summary>
     <div class="foldable-content">
       <div class="calendar-grid" id="calendarGrid"></div>
     </div>
   </details>
 
-  <!-- 5. 카테고리별 지출 (접어두기) -->
+  <!-- 5. 카테고리별 지출 현황 (접어두기) -->
   <details class="foldable-card" id="chartDetails">
-    <summary>📊 카테고리별 지출 내역</summary>
+    <summary>📊 카테고리별 지출 현황</summary>
     <div class="foldable-content">
       <div style="position: relative; height:200px; width:100%;">
         <canvas id="categoryChart"></canvas>
@@ -466,23 +466,15 @@
     </div>
   </details>
 
-<!-- 6. 고정지출 관리 (접어두기) -->
+  <!-- 6. 고정지출 관리 (접어두기) -->
   <details class="foldable-card">
     <summary>🔄 고정지출 자동등록 설정</summary>
     <div class="foldable-content">
       <form id="fixedExpenseForm" class="form-group" style="margin-bottom: 12px;">
-        <!-- 1) 카테고리 -->
         <select id="fixedCategorySelect" required></select>
-        
-        <!-- 2) 항목명 -->
         <input type="text" id="fixedName" placeholder="항목명 (예: 월세/공과금)" required>
-        
-        <!-- 3) 날짜(일) -->
         <input type="number" id="fixedDay" placeholder="날짜(일)" min="1" max="31" required>
-        
-        <!-- 4) 금액 -->
         <input type="number" id="fixedAmount" placeholder="금액 (원)" required>
-        
         <button type="submit" class="btn-gray">고정지출 등록</button>
       </form>
       <button id="applyFixedBtn" class="btn-primary" style="margin-bottom: 12px;">
@@ -513,7 +505,7 @@
 
   <!-- 8. 데이터베이스 (접어두기) -->
   <details class="foldable-card">
-    <summary>🗂️ 전체 입력 내역 데이터베이스</summary>
+    <summary>🗄️ 전체 입력 내역 데이터베이스</summary>
     <div class="foldable-content">
       <div class="db-table-container">
         <table class="db-table">
@@ -539,10 +531,7 @@
         income: ['월급', '용돈', '캐쉬백', '기타'],
         expense: ['월세', '보험', '통신', '교통', '식비', '데이트', '쇼핑', '세금', '의료', '문화생활']
       },
-      fixedExpenses: [
-        { id: 1, name: '월세', category: '월세', amount: 500000, day: 25 },
-        { id: 2, name: '보험료', category: '보험', amount: 100000, day: 10 }
-      ],
+      fixedExpenses: [], // 기본 쓰여진 고정지출 제거
       transactions: []
     };
 
@@ -557,7 +546,7 @@
             income: parsed.categories?.income || defaultData.categories.income,
             expense: parsed.categories?.expense || defaultData.categories.expense
           },
-          fixedExpenses: parsed.fixedExpenses || defaultData.fixedExpenses,
+          fixedExpenses: parsed.fixedExpenses || [],
           transactions: parsed.transactions || defaultData.transactions
         };
       }
